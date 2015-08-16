@@ -14,14 +14,14 @@ public class Event extends Resource {
     protected String clientEventTime = "";
     protected String ipAddress = "";
     protected String logLevel = "";
-    protected String tags = "";
-    protected String json = "";
+    protected Object[] tags = null;
+    protected Map json = new HashMap();
     protected String eventTime = "";
 
     public Event() {}
 
     public Event(String accountId, String appId, String contextId, String eventName, String clientId, String sessionId,
-        String logLevel, String tags, String json, String apiKey, String apiSecret, String baseUrl) {
+        String logLevel, Object[] tags, Map json, String apiKey, String apiSecret, String baseUrl) {
 
         this.accountId = accountId;
         this.appId = appId;
@@ -53,7 +53,6 @@ public class Event extends Resource {
         body.put("tags", tags);
         body.put("json", json);
 
-        //JsonOutput.toJson(body)
         JSONObject j = new JSONObject(body);
         return j.toString();
     }

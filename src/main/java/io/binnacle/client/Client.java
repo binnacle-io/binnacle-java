@@ -2,6 +2,10 @@ package io.binnacle.client;
 
 import io.binnacle.client.resources.Event;
 import io.binnacle.client.resources.Recents;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Entry point into the application.
@@ -11,39 +15,49 @@ public class Client {
     private Configuration configuration = null;
 
     public Client() {
-      configuration = new Configuration();
+        configuration = new Configuration();
     }
 
     public Client(String account, String appId, String apiKey, String apiSecret, String url) {
-      configuration = new Configuration(account, appId, apiKey, apiSecret, url);
+        configuration = new Configuration(account, appId, apiKey, apiSecret, url);
     }
 
-    // def signal(String contextId, String eventName, String clientId, String sessionId, String logLevel, tags = [], json = [:]) {
-    public void signal(String contextId, String eventName, String clientId, String sessionId, String logLevel) {
-      Event event = new Event(configuration.getAccount(), configuration.getApp(), contextId,
-        eventName, clientId, sessionId, logLevel, null, null,//tags, json,
-        configuration.getApiKey(), configuration.getApiSecret(), configuration.getUrl());
-
-      event.post();
-    }
-    /*
-    def signalAsync(contextId, eventName, clientId, sessionId, logLevel, tags = [], json = [:]) {
-      def event = new Event(accountId: configuration.account, appId: configuration.app, contextId: contextId,
-        eventName: eventName, clientId: clientId, sessionId: sessionId, logLevel: logLevel, tags: tags, json: json,
-        apiKey: configuration.apiKey, apiSecret: configuration.apiSecret, baseUrl: configuration.url)
-
-      event.postAsync()
+    public JSONObject signal(String contextId, String eventName, String clientId, String sessionId, String logLevel) {
+        return signal(contextId, eventName, clientId, sessionId, logLevel, null, null);
     }
 
-    def recents(lines, since = null, context_id = null) {
-      def recent = new Recents(lines : lines, since : since, baseUrl: configuration.url,
-        apiKey: configuration.apiKey, apiSecret: configuration.apiSecret)
+    public JSONObject signal(String contextId, String eventName, String clientId, String sessionId, String logLevel, Object[] tags, Map json) {
+        Event event = new Event(configuration.getAccount(), configuration.getApp(), contextId,
+            eventName, clientId, sessionId, logLevel, tags, json,
+            configuration.getApiKey(), configuration.getApiSecret(), configuration.getUrl());
 
-      recent.post()
+        return event.post().getObject();
     }
 
-    def reportException(exception, env) {
-      Resource.postAsync()
+    public void signalAsync(String contextId, String eventName, String clientId, String sessionId, String logLevel) {
+        signalAsync(contextId, eventName, clientId, sessionId, logLevel, null, null);
     }
-    */
+
+    public void signalAsync(String contextId, String eventName, String clientId, String sessionId, String logLevel, Object[] tags, Map json) {
+        Event event = new Event(configuration.getAccount(), configuration.getApp(), contextId,
+            eventName, clientId, sessionId, logLevel, tags, json,
+            configuration.getApiKey(), configuration.getApiSecret(), configuration.getUrl());
+
+        event.postAsync();
+    }
+
+    public JSONArray recents(String contextId, int lines) {
+        return recents(contextId, lines, "");
+    }
+
+    public JSONArray recents(String contextId, int lines, String since) {
+        Recents recents = new Recents(contextId, lines, since, configuration.getUrl(), configuration.getApiKey(), configuration.getApiSecret(),
+            configuration.getAccount(), configuration.getApp());
+
+        return recents.get().getArray();
+    }
+
+    public void reportException(Exception exception, Map env) {
+      //Resource.postAsync()
+    }
 }
